@@ -1,6 +1,7 @@
 // src/api/axiosClient.js
 import axios from 'axios';
 
+
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const axiosClient = axios.create({
@@ -12,6 +13,7 @@ const axiosClient = axios.create({
     'Accept': 'application/json',
     'Cache-Control': 'public, max-age=300'
   },
+   decompress: true,
 });
 
 axiosClient.interceptors.request.use(
@@ -32,8 +34,9 @@ axiosClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401 && error.response?.data?.message === 'Non autorisé, token invalide') {
+
       localStorage.removeItem('token');
-      window.location.href = '/login'; 
+      window.location.href = '/login'; // Rediriger l'utilisateur
     }
     return Promise.reject(error);
   }

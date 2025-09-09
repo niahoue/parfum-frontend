@@ -1,4 +1,4 @@
-// src/pages/ProductListingPage.jsx
+// src/pages/ProductListingPage.jsx - Version corrigée
 import React, { useState, useEffect } from 'react';
 import ProductCard from '../components/ProductCard';
 import { Input } from '../components/ui/input';
@@ -29,6 +29,7 @@ const ProductListingPage = () => {
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
   const [productTypes, setProductTypes] = useState([]);
+  const [filtersLoaded, setFiltersLoaded] = useState(false);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -61,7 +62,7 @@ const ProductListingPage = () => {
         setCategories(categoriesRes.data);
 
         // Charger tous les produits pour extraire les marques et types uniques
-        const allProductsRes = await axiosClient.get('/products');
+        const allProductsRes = await axiosClient.get('/products?pageSize=1000');
         const allProducts = allProductsRes.data.products || [];
         
         // Extraire les marques uniques
@@ -72,8 +73,10 @@ const ProductListingPage = () => {
         const uniqueTypes = [...new Set(allProducts.map(p => p.type).filter(Boolean))];
         setProductTypes(uniqueTypes);
 
+        setFiltersLoaded(true);
       } catch (err) {
         console.error('Erreur lors du chargement des données de filtre:', err);
+        setFiltersLoaded(true); // Permettre le chargement même en cas d'erreur
       }
     };
 
@@ -84,37 +87,52 @@ const ProductListingPage = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       setLoading(true);
+      setError(null);
+      
       try {
         const params = new URLSearchParams();
         
         // Ajouter les paramètres de filtrage
         if (searchQuery) params.append('keyword', searchQuery);
-        if (selectedCategory && selectedCategory !== 'all') params.append('category', selectedCategory);
+        
+        // Pour la catégorie, envoyer le nom plutôt que l'ID si c'est un ObjectId
+        if (selectedCategory && selectedCategory !== 'all') {
+          const categoryName = getCategoryNameById(selectedCategory);
+          if (categoryName) {
+            params.append('category', categoryName);
+          } else {
+            // Si on ne trouve pas le nom, peut-être que c'est déjà un nom
+            params.append('category', selectedCategory);
+          }
+        }
+        
         if (minPrice) params.append('minPrice', minPrice);
         if (maxPrice) params.append('maxPrice', maxPrice);
         if (selectedBrand && selectedBrand !== 'all') params.append('brand', selectedBrand);
         if (selectedType && selectedType !== 'all') params.append('type', selectedType);
-        if (isNewFilter === 'true') params.append('isNewProduct', 'true');
+        if (isNewFilter === 'true') params.append('isNew', 'true');
         if (isBestSellerFilter === 'true') params.append('isBestSeller', 'true');
 
-        console.log('Paramètres de requête:', params.toString()); // Debug
+        console.log('Paramètres de requête:', params.toString());
 
         const { data } = await axiosClient.get(`/products?${params.toString()}`);
+        console.log('Données reçues:', data);
+        
         setProducts(data.products || []); 
-        setError(null);
       } catch (err) {
         console.error('Erreur lors du chargement des produits:', err);
         setError(err.response?.data?.message || 'Impossible de charger les produits. Veuillez réessayer plus tard.');
+        setProducts([]);
       } finally {
         setLoading(false);
       }
     };
 
-    // Ne charger les produits que si les catégories sont déjà chargées (pour éviter les requêtes inutiles)
-    if (categories.length > 0) {
+    // Charger les produits dès que les filtres sont prêts OU si on n'a pas besoin des filtres
+    if (filtersLoaded || (!searchQuery && selectedCategory === 'all' && !selectedBrand && !selectedType)) {
       fetchProducts();
     }
-  }, [searchQuery, selectedCategory, minPrice, maxPrice, selectedBrand, selectedType, isNewFilter, isBestSellerFilter, categories]);
+  }, [searchQuery, selectedCategory, minPrice, maxPrice, selectedBrand, selectedType, isNewFilter, isBestSellerFilter, filtersLoaded, categories]);
 
   // Fonction pour mettre à jour l'URL avec les nouveaux filtres
   const updateURLParams = (newParams) => {
@@ -215,7 +233,12 @@ const ProductListingPage = () => {
   );
 
   if (error) return (
-    <div className="text-center py-10 text-red-600">{error}</div>
+    <div className="text-center py-10 text-red-600">
+      <p className="text-lg mb-4">{error}</p>
+      <Button onClick={() => window.location.reload()} variant="outline">
+        Réessayer
+      </Button>
+    </div>
   );
 
   const { title, subtitle } = getPageTitle();
