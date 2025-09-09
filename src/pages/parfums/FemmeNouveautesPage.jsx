@@ -1,9 +1,9 @@
-// src/pages/parfums/FemmeNouveautesPage.jsx
+// src/pages/parfums/FemmeNouveautesPage.jsx - Version corrigée
 import React, { useState, useEffect } from 'react';
-import axiosClient from '../../api/axiosClient'; // Assurez-vous que le chemin est correct
-import ProductCard from '../../components/ProductCard'; // Importez le composant ProductCard
-import { Loader2 } from 'lucide-react'; // Pour l'icône de chargement
-import { useNavigate } from 'react-router-dom'; // Pour la navigation si nécessaire
+import axiosClient from '../../api/axiosClient';
+import ProductCard from '../../components/ProductCard';
+import { Loader2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const FemmeNouveautesPage = () => {
   const [products, setProducts] = useState([]);
@@ -14,26 +14,22 @@ const FemmeNouveautesPage = () => {
   useEffect(() => {
     const fetchNewArrivals = async () => {
       setLoading(true);
+      setError(null);
+      
       try {
-        // Étapes pour trouver la catégorie "Femme" par son nom
-        const categoriesRes = await axiosClient.get('/categories');
-        const femaleCategory = categoriesRes.data.find(cat => cat.name.toLowerCase() === 'femme');
-
-        if (!femaleCategory) {
-          setError('Catégorie "Femme" non trouvée. Veuillez la créer dans le panneau d\'administration.');
-          setLoading(false);
-          return;
-        }
-
-        // Récupérer les produits qui sont des "nouveautés" et de la catégorie "Femme"
+        console.log('Chargement des nouveautés femme...');
+        
         const { data } = await axiosClient.get('/products', {
           params: {
-            isNewProduct: true, // Filtrer par les nouveaux produits
-            category: femaleCategory._id // Filtrer par l'ID de la catégorie "Femme"
+            category: 'femme',
+            isNew: 'true', // Utiliser isNew au lieu de isNewProduct
+            pageSize: 100
           }
         });
-        setProducts(data.products || []); // Votre API retourne data.products
-        setError(null);
+        
+        console.log('Nouveautés reçues:', data);
+        setProducts(data.products || []);
+        
       } catch (err) {
         console.error('Erreur lors du chargement des nouveautés femme:', err);
         setError(err.response?.data?.message || 'Échec du chargement des nouveautés parfums femme.');
@@ -45,9 +41,8 @@ const FemmeNouveautesPage = () => {
     fetchNewArrivals();
   }, []);
 
-  // Fonction de gestion pour la vue détaillée (si ProductCard le nécessite)
   const handleViewDetails = (product) => {
-    navigate(`/product/${product._id}`); // Navigue vers la page de détails du produit
+    navigate(`/product/${product._id}`);
   };
 
   return (
@@ -59,25 +54,39 @@ const FemmeNouveautesPage = () => {
 
       {loading ? (
         <div className="text-center py-10">
-          <Loader2 className="animate-spin inline-block mr-2" />Chargement des nouveautés...
+          <Loader2 className="animate-spin inline-block mr-2" />
+          Chargement des nouveautés...
         </div>
       ) : error ? (
         <div className="text-center py-10 text-red-600">
           <p className="text-lg">{error}</p>
-          {error.includes("Catégorie") && (
-            <p className="mt-4 text-gray-700">Veuillez vous assurer qu'une catégorie nommée "Femme" existe et que des produits marqués comme "nouveaux" lui sont associés.</p>
-          )}
+          <button 
+            onClick={() => window.location.reload()} 
+            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            Réessayer
+          </button>
         </div>
       ) : products.length === 0 ? (
         <div className="text-center text-gray-600 py-10">
-          Aucune nouveauté parfum femme trouvée pour le moment.
+          <p className="text-lg mb-2">Aucune nouveauté parfum femme trouvée pour le moment.</p>
+          <p className="text-sm text-gray-500">
+            Vérifiez que des produits femme sont marqués comme "nouveaux" dans l'administration.
+          </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {products.map((product) => (
-            <ProductCard key={product._id} product={product} onViewDetails={handleViewDetails} />
-          ))}
-        </div>
+        <>
+          <div className="text-center mb-6">
+            <p className="text-gray-600">
+              {products.length} nouveauté{products.length > 1 ? 's' : ''} trouvée{products.length > 1 ? 's' : ''}
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {products.map((product) => (
+              <ProductCard key={product._id} product={product} onViewDetails={handleViewDetails} />
+            ))}
+          </div>
+        </>
       )}
     </div>
   );

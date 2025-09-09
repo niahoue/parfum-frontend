@@ -145,75 +145,39 @@ const Header = ({ onCartClick }) => {
   };
 
   // Configuration de la navigation avec les sous-menus améliorés
-  const navigation = [
-    { 
-      name: 'Parfums Femme', 
-      href: '/products?category=' + (categories.find(cat => cat.name.toLowerCase() === 'femme')?._id || ''),
-      type: 'category', 
-      categoryName: 'femme', 
-      submenu: [
-        { 
-          name: 'Eau de Parfum', 
-          onClick: () => handleNavigateWithFilters('femme', 'Eau de Parfum') 
-        },
-        { 
-          name: 'Eau de Toilette', 
-          onClick: () => handleNavigateWithFilters('femme', 'Eau de Toilette') 
-        },
-        { 
-          name: 'Nouveautés', 
-          onClick: () => handleNavigateWithFilters('femme', null, true, null) 
-        },
-        { 
-          name: 'Best-Sellers', 
-          onClick: () => handleNavigateWithFilters('femme', null, null, true) 
-        }
-      ]
-    },
-    { 
-      name: 'Parfums Homme', 
-      href: '/products?category=' + (categories.find(cat => cat.name.toLowerCase() === 'homme')?._id || ''),
-      type: 'category', 
-      categoryName: 'homme', 
-      submenu: [
-        { 
-          name: 'Eau de Parfum', 
-          onClick: () => handleNavigateWithFilters('homme', 'Eau de Parfum') 
-        },
-        { 
-          name: 'Eau de Toilette', 
-          onClick: () => handleNavigateWithFilters('homme', 'Eau de Toilette') 
-        },
-        { 
-          name: 'Nouveautés', 
-          onClick: () => handleNavigateWithFilters('homme', null, true, null) 
-        },
-        { 
-          name: 'Best-Sellers', 
-          onClick: () => handleNavigateWithFilters('homme', null, null, true) 
-        }
-      ]
-    },
-    { 
-      name: 'Parfums Mixte', 
-      href: '/products?category=' + (categories.find(cat => cat.name.toLowerCase() === 'mixte')?._id || ''),
-      type: 'category', 
-      categoryName: 'mixte', 
-      submenu: [
-        { 
-          name: 'Unisexe', 
-          onClick: () => handleNavigateWithFilters('mixte', 'Unisexe') 
-        },
-        { 
-          name: 'Niche', 
-          onClick: () => handleNavigateWithFilters('mixte', 'Niche') 
-        },
-        { 
-          name: 'Artisanal', 
-          onClick: () => handleNavigateWithFilters('mixte', 'Artisanal') 
-        }
-      ]
-    },
+const navigation = [
+  { 
+    name: 'Parfums Femme', 
+    type: 'category', 
+    categoryName: 'Femme', // Majuscule pour correspondre aux données
+    submenu: [
+      { name: 'Eau de Parfum', onClick: () => handleNavigateWithFilters('Femme', 'Eau de Parfum') },
+      { name: 'Eau de Toilette', onClick: () => handleNavigateWithFilters('Femme', 'Eau de Toilette') },
+      { name: 'Nouveautés', onClick: () => handleNavigateWithFilters('Femme', null, true, null) },
+      { name: 'Best-Sellers', onClick: () => handleNavigateWithFilters('Femme', null, null, true) }
+    ]
+  },
+  { 
+    name: 'Parfums Homme', 
+    type: 'category', 
+    categoryName: 'Homme',
+    submenu: [
+      { name: 'Eau de Parfum', onClick: () => handleNavigateWithFilters('Homme', 'Eau de Parfum') },
+      { name: 'Eau de Toilette', onClick: () => handleNavigateWithFilters('Homme', 'Eau de Toilette') },
+      { name: 'Nouveautés', onClick: () => handleNavigateWithFilters('Homme', null, true, null) },
+      { name: 'Best-Sellers', onClick: () => handleNavigateWithFilters('Homme', null, null, true) }
+    ]
+  },
+  { 
+    name: 'Parfums Mixte', 
+    type: 'category', 
+    categoryName: 'Mixte',
+    submenu: [
+      { name: 'Unisexe', onClick: () => handleNavigateWithFilters('Mixte', 'Unisexe') },
+      { name: 'Niche', onClick: () => handleNavigateWithFilters('Mixte', 'Niche') },
+      { name: 'Artisanal', onClick: () => handleNavigateWithFilters('Mixte', 'Artisanal') }
+    ]
+  },
     { 
       name: 'Marques', 
       href: '/marques', 
@@ -256,7 +220,12 @@ const Header = ({ onCartClick }) => {
     { name: 'Promotions', href: '/promotions' },
     { name: 'Nouveautés', href: '/nouveautes' }
   ];
-
+navigation.forEach(item => {
+  if(item.type === 'category') {
+    const category = categories.find(cat => cat.name.toLowerCase() === item.categoryName.toLowerCase());
+    item.href = category ? `/products?category=${category._id}` : '/products';
+  }
+});
   return (
     <header className="bg-white shadow-lg border-b border-gray-100 sticky top-0 z-50">
       {/* Top bar with promo */}

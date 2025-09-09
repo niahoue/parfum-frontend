@@ -96,13 +96,21 @@ const ProductListingPage = () => {
         if (searchQuery) params.append('keyword', searchQuery);
         
         // Pour la catégorie, envoyer le nom plutôt que l'ID si c'est un ObjectId
-        if (selectedCategory && selectedCategory !== 'all') {
-          const categoryName = getCategoryNameById(selectedCategory);
-          if (categoryName) {
-            params.append('category', categoryName);
-          } else {
-            // Si on ne trouve pas le nom, peut-être que c'est déjà un nom
+  if (selectedCategory && selectedCategory !== 'all') {
+          // Vérifier si c'est un ObjectId MongoDB (24 caractères hexadécimaux)
+          const isObjectId = /^[0-9a-fA-F]{24}$/.test(selectedCategory);
+          if (isObjectId) {
             params.append('category', selectedCategory);
+          } else {
+            // Si c'est un nom de catégorie, trouver l'ID correspondant
+            const category = categories.find(cat => 
+              cat.name.toLowerCase() === selectedCategory.toLowerCase()
+            );
+            if (category) {
+              params.append('category', category._id);
+            } else {
+              params.append('category', selectedCategory);
+            }
           }
         }
         
