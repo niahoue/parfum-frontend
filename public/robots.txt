@@ -1,4 +1,33 @@
+# robots.txt pour Fragrance de Mumu
+# Bloquer certaines pages sensibles ou inutiles pour le SEO
 User-agent: *
+Disallow: /login
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /checkout
+Disallow: /panier
+Disallow: /payment-success
+Disallow: /payment-cancel
+Disallow: /admin
+Disallow: /admin/*
+
+# Autoriser l’accès aux pages publiques et au sitemap
 Allow: /
 
+# Emplacement du sitemap
 Sitemap: https://www.fragrancedemumu.com/sitemap.xml
+
+# Directives pour Googlebot (optionnel mais recommandé)
+User-agent: Googlebot
+Disallow: /login
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /checkout
+Disallow: /panier
+Disallow: /payment-success
+Disallow: /payment-cancel
+Disallow: /admin
+Disallow: /admin/*
+Allow: /
+
+# Fin du fichier

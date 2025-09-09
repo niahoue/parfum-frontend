@@ -32,7 +32,7 @@ import PromotionsPage from './pages/PromotionsPage';
 import NewArrivalsPage from './pages/NewArrivalsPage';
 import AboutUsPage from './pages/AboutUsPage';
 import ContactPage from './pages/ContactPage';
-import FAQPage from './pages/FAQPage';
+import FAQPage from './pages/FaqPage';
 import ShippingReturnsPage from './pages/ShippingReturnsPage';
 import TermsPage from './pages/TermsPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';

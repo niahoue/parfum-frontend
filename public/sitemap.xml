@@ -1,47 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <!-- Pages publiques -->
-  <url><loc>https://www.fragrancedemumu.com/</loc></url>
-  <url><loc>https://www.fragrancedemumu.com/products</loc></url>
-  <url><loc>https://www.fragrancedemumu.com/login</loc></url>
-  <url><loc>https://www.fragrancedemumu.com/register</loc></url>
-  <url><loc>https://www.fragrancedemumu.com/forgot-password</loc></url>
-  <url><loc>https://www.fragrancedemumu.com/promotions</loc></url>
-  <url><loc>https://www.fragrancedemumu.com/nouveautes</loc></url>
-  <url><loc>https://www.fragrancedemumu.com/parfums/femme</loc></url>
-  <url><loc>https://www.fragrancedemumu.com/parfums/homme</loc></url>
-  <url><loc>https://www.fragrancedemumu.com/parfums/mixte</loc></url>
-  <url><loc>https://www.fragrancedemumu.com/marques</loc></url>
-  <url><loc>https://www.fragrancedemumu.com/cosmetiques</loc></url>
-  <url><loc>https://www.fragrancedemumu.com/payment-success</loc></url>
-  <url><loc>https://www.fragrancedemumu.com/payment-cancel</loc></url>
-  <!-- Pages du footer -->
-  <url><loc>https://www.fragrancedemumu.com/a-propos</loc></url>
-  <url><loc>https://www.fragrancedemumu.com/nos-valeurs</loc></url>
-  <url><loc>https://www.fragrancedemumu.com/carrieres</loc></url>
-  <url><loc>https://www.fragrancedemumu.com/contact</loc></url>
-  <url><loc>https://www.fragrancedemumu.com/faq</loc></url>
-  <url><loc>https://www.fragrancedemumu.com/livraison-retours</loc></url>
-  <url><loc>https://www.fragrancedemumu.com/cgv</loc></url>
-  <url><loc>https://www.fragrancedemumu.com/politique-confidentialite</loc></url>
-  <url><loc>https://www.fragrancedemumu.com/mentions-legales</loc></url>
-  <!-- Pages privées (utilisateur connecté) -->
-  <url><loc>https://www.fragrancedemumu.com/mon-compte</loc></url>
-  <url><loc>https://www.fragrancedemumu.com/favoris</loc></url>
-  <url><loc>https://www.fragrancedemumu.com/checkout</loc></url>
-  <url><loc>https://www.fragrancedemumu.com/historique-commandes</loc></url>
-  <url><loc>https://www.fragrancedemumu.com/panier</loc></url>
-  <!-- Pages administrateur -->
-  <url><loc>https://www.fragrancedemumu.com/admin</loc></url>
-  <url><loc>https://www.fragrancedemumu.com/admin/products</loc></url>
-  <url><loc>https://www.fragrancedemumu.com/admin/categories</loc></url>
-  <url><loc>https://www.fragrancedemumu.com/admin/orders</loc></url>
-  <url><loc>https://www.fragrancedemumu.com/admin/users</loc></url>
-  <url><loc>https://www.fragrancedemumu.com/admin/stats</loc></url>
-  <url><loc>https://www.fragrancedemumu.com/admin/promotions</loc></url>
-  <url><loc>https://www.fragrancedemumu.com/admin/newsletters</loc></url>
-  <!-- 404 non incluse -->
-</urlset>
+
+  <!-- Pages principales -->
+  <url>
+    <loc>https://www.fragrancedemumu.com/</loc>
+    <lastmod>2025-08-18</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
   <url>
     <loc>https://www.fragrancedemumu.com/products</loc>
     <lastmod>2025-08-18</lastmod>
@@ -60,30 +26,8 @@
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
-  <url>
-    <loc>https://www.fragrancedemumu.com/carrieres</loc>
-    <lastmod>2025-08-18</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://www.fragrancedemumu.com/login</loc>
-    <lastmod>2025-08-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://www.fragrancedemumu.com/register</loc>
-    <lastmod>2025-08-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://www.fragrancedemumu.com/panier</loc>
-    <lastmod>2025-08-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.5</priority>
-  </url>
+
+  <!-- Catégories -->
   <url>
     <loc>https://www.fragrancedemumu.com/parfums/femme</loc>
     <lastmod>2025-08-18</lastmod>
@@ -103,24 +47,82 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.fragrancedemumu.com/cosmetiques</loc>
-    <lastmod>2025-08-18</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
     <loc>https://www.fragrancedemumu.com/marques</loc>
     <lastmod>2025-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
-  <!-- Exemple pour une page de produit individuelle, à générer dynamiquement -->
+  <url>
+    <loc>https://www.fragrancedemumu.com/cosmetiques</loc>
+    <lastmod>2025-08-18</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Pages d’information -->
+  <url>
+    <loc>https://www.fragrancedemumu.com/a-propos</loc>
+    <lastmod>2025-08-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://www.fragrancedemumu.com/nos-valeurs</loc>
+    <lastmod>2025-08-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://www.fragrancedemumu.com/carrieres</loc>
+    <lastmod>2025-08-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://www.fragrancedemumu.com/contact</loc>
+    <lastmod>2025-08-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.fragrancedemumu.com/faq</loc>
+    <lastmod>2025-08-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://www.fragrancedemumu.com/livraison-retours</loc>
+    <lastmod>2025-08-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://www.fragrancedemumu.com/cgv</loc>
+    <lastmod>2025-08-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://www.fragrancedemumu.com/politique-confidentialite</loc>
+    <lastmod>2025-08-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://www.fragrancedemumu.com/mentions-legales</loc>
+    <lastmod>2025-08-18</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+
+  <!-- Exemple dynamique (à générer automatiquement via backend ou script) -->
   <!--
   <url>
-    <loc>https://www.fragrancedemumu.com/products/ID_DU_PRODUIT_1</loc>
+    <loc>https://www.fragrancedemumu.com/products/ID_DU_PRODUIT</loc>
     <lastmod>2025-08-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   -->
+
 </urlset>
