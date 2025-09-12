@@ -306,7 +306,7 @@ navigation.forEach(item => {
                         ) : (
                           <>
                             <Link
-                              to="/profile"
+                              to="/mon-compte"
                               className="block px-4 py-2 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors"
                               onClick={() => setIsUserMenuOpen(false)}
                             >
@@ -495,7 +495,7 @@ navigation.forEach(item => {
                   ) : (
                     <>
                       <Link
-                        to="/profile"
+                        to="/mon-compte"
                         className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-purple-600 hover:bg-purple-50 rounded-md transition-colors"
                         onClick={() => setIsMenuOpen(false)}
                       >

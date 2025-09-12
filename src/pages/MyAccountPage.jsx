@@ -223,7 +223,7 @@ const UserWishlist = () => {
 
 
 const MyAccountPage = () => {
-  const { user, loading: authLoading, updateUserProfile: updateAuthUserProfile } = useAuth();
+  const { user, authLoading,  updateAuthUserProfile } = useAuth();
   const navigate = useNavigate();
   const location = useLocation(); // Utilisez useLocation pour obtenir le chemin actuel
   const [isEditingProfile, setIsEditingProfile] = useState(false);

@@ -1,13 +1,14 @@
 // src/components/Hero.jsx
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, ShoppingBag, Star } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ShoppingBag, Star, Loader2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { Link } from 'react-router-dom';
-import axiosClient from '../api/axiosClient'; // Importez axiosClient
+import axiosClient from '../api/axiosClient';
+import { getImageUrl } from '../utils/imageUtils';
 
 const Hero = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [bestSellers, setBestSellers] = useState([]); // Nouvel état pour les best-sellers
+  const [bestSellers, setBestSellers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -15,25 +16,21 @@ const Hero = () => {
     const fetchBestSellers = async () => {
       setLoading(true);
       try {
-        // Récupérer les produits marqués comme isBestSeller
         const { data } = await axiosClient.get('/products', {
-          params: { isBestSeller: true, limit: 5 } // Limiter à quelques produits pour le héros
+          params: { isBestSeller: true, limit: 5 }
         });
         
-        // Si aucun best-seller n'est trouvé, ou s'il y en a moins de 2 (pour éviter les erreurs de modulo)
-        // vous pouvez définir un contenu par défaut ou gérer cela.
         if (data.products && data.products.length > 0) {
           setBestSellers(data.products);
         } else {
-          // Fallback ou message si aucun best-seller n'est disponible
-          setBestSellers([]); 
-          console.warn("Aucun produit best-seller trouvé. Le carrousel du héros pourrait être vide ou afficher un contenu générique.");
+          setBestSellers([]);
+          console.warn("No best-seller products found. Hero carousel might be empty or show generic content.");
         }
         setError(null);
       } catch (err) {
-        console.error('Erreur lors du chargement des best-sellers pour le Hero:', err);
-        setError(err.response?.data?.message || 'Échec du chargement des produits vedettes.');
-        setBestSellers([]); // Assurez-vous que bestSellers est vide en cas d'erreur
+        console.error('Error fetching best-sellers for Hero:', err);
+        setError(err.response?.data?.message || 'Failed to load featured products.');
+        setBestSellers([]);
       } finally {
         setLoading(false);
       }
@@ -43,13 +40,13 @@ const Hero = () => {
   }, []);
 
   useEffect(() => {
-    if (bestSellers.length > 0) {
+    if (bestSellers.length > 1) {
       const timer = setInterval(() => {
         setCurrentSlide((prev) => (prev + 1) % bestSellers.length);
       }, 5000);
       return () => clearInterval(timer);
     }
-  }, [bestSellers]); // Redéclencher le timer si les bestSellers changent
+  }, [bestSellers]);
 
   const nextSlide = () => {
     if (bestSellers.length > 0) {
@@ -63,11 +60,10 @@ const Hero = () => {
     }
   };
 
-  // Afficher un indicateur de chargement ou un message d'erreur si nécessaire
   if (loading) {
     return (
       <div className="relative h-[80vh] flex items-center justify-center bg-gray-900 text-white">
-        <Loader2 className="animate-spin w-10 h-10 mr-2" /> Chargement des offres spéciales...
+        <Loader2 className="animate-spin w-10 h-10 mr-2" /> Loading special offers...
       </div>
     );
   }
@@ -75,16 +71,15 @@ const Hero = () => {
   if (error) {
     return (
       <div className="relative h-[80vh] flex items-center justify-center bg-red-900 text-white">
-        Erreur: {error}
+        Error: {error}
       </div>
     );
   }
 
-  // Si aucun best-seller n'est trouvé après le chargement
   if (bestSellers.length === 0) {
     return (
       <div className="relative h-[80vh] flex items-center justify-center bg-gray-800 text-white">
-        <p className="text-xl">Aucun produit vedette disponible pour le moment.</p>
+        <p className="text-xl">No featured products available at the moment.</p>
       </div>
     );
   }
@@ -96,16 +91,23 @@ const Hero = () => {
       {/* Background Images */}
       {bestSellers.map((product, index) => (
         <div
-          key={product._id} // Utilisez l'ID du produit comme clé
+          key={product._id}
           className={`absolute inset-0 transition-transform duration-1000 ease-in-out ${
             index === currentSlide ? 'translate-x-0' : index < currentSlide ? '-translate-x-full' : 'translate-x-full'
           }`}
         >
           <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent z-10" />
           <img
-            src={product.imageUrl} // Utilisez l'image du produit
+            src={getImageUrl(product.imageUrl, { 
+              width: 1920, 
+              height: 1080, 
+              crop: 'fit', 
+              quality: 'auto', 
+              format: 'auto' 
+            })}
             alt={product.name}
             className="w-full h-full object-cover"
+            loading={index === 0 ? 'eager' : 'lazy'}
           />
         </div>
       ))}
@@ -124,17 +126,17 @@ const Hero = () => {
 
             {/* Title */}
             <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight transform translate-y-8 opacity-0 animate-fade-in-up animation-delay-200">
-              {currentProduct.name} {/* Nom du produit */}
+              {currentProduct.name}
             </h1>
 
             {/* Subtitle (peut-être la marque ou la catégorie) */}
             <h2 className="text-xl md:text-2xl text-gray-200 mb-4 font-light transform translate-y-8 opacity-0 animate-fade-in-up animation-delay-400">
-              {currentProduct.brand} {/* Marque du produit */}
+              {currentProduct.brand}
             </h2>
 
             {/* Description */}
             <p className="text-lg text-gray-300 mb-8 max-w-lg leading-relaxed transform translate-y-8 opacity-0 animate-fade-in-up animation-delay-600">
-              {currentProduct.description.substring(0, 100)}... {/* Description courte */}
+              {currentProduct.description.substring(0, 100)}...
             </p>
 
             {/* CTA Buttons */}
@@ -144,9 +146,9 @@ const Hero = () => {
                 className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold px-8 py-4 rounded-full shadow-xl hover:shadow-2xl transform hover:-translate-y-1 transition-all duration-300"
                 asChild
               >
-                <Link to={`/products/${currentProduct._id}`}> {/* Lien vers la page du produit */}
+                <Link to={`/products/${currentProduct._id}`}>
                   <ShoppingBag className="w-5 h-5 mr-2" />
-                  Voir le produit
+                  View Product
                 </Link>
               </Button>
               <Button
@@ -156,7 +158,7 @@ const Hero = () => {
                 asChild
               >
                 <Link to="/products">
-                  Voir la Collection
+                  View Collection
                 </Link>
               </Button>
             </div>
@@ -201,8 +203,5 @@ const Hero = () => {
     </div>
   );
 };
-
-// Ajoutez cet import si vous ne l'avez pas déjà
-import { Loader2 } from 'lucide-react';
 
 export default Hero;

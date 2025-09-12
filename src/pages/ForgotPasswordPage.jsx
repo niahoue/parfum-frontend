@@ -1,5 +1,5 @@
 // src/pages/ForgotPasswordPage.jsx
-import React, { useState } from 'react';
+import React, { useState,navigate } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -21,9 +21,6 @@ const ForgotPasswordPage = () => {
     setIsLoading(true);
     
     try {
-      console.log('📧 Envoi de la demande de réinitialisation pour:', email);
-      
-      // Appel à l'API backend
       const config = {
         headers: {
           'Content-Type': 'application/json',
@@ -41,13 +38,11 @@ const ForgotPasswordPage = () => {
       toast.success('Un lien de réinitialisation vous a été envoyé par email');
       
       // Optionnel : rediriger vers la page de connexion après quelques secondes
-      // setTimeout(() => {
-      //   navigate('/login');
-      // }, 3000);
+       setTimeout(() => {
+        navigate('/login');
+       }, 3000);
       
     } catch (error) {
-      console.error('❌ Erreur lors de la demande de réinitialisation:', error);
-      
       const errorMessage = error.response?.data?.message || 
                           error.response?.data?.error ||
                           error.message ||

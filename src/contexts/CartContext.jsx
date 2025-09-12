@@ -9,7 +9,7 @@ const CartContext = createContext(null);
 
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState(() => {
-    // Charger le panier depuis le localStorage au démarrage
+    
     try {
       const localCart = localStorage.getItem('cartItems');
       return localCart ? JSON.parse(localCart) : [];
@@ -19,8 +19,8 @@ export const CartProvider = ({ children }) => {
     }
   });
 
-  const { user, token, loading: authLoading } = useAuth(); // Récupérer l'utilisateur et le token d'authentification
-
+  const { user, token, loading: authLoading } = useAuth(); 
+  const [loading, setLoading] = useState(false);
   // Synchroniser le panier avec le localStorage à chaque modification
   useEffect(() => {
     localStorage.setItem('cartItems', JSON.stringify(cartItems));
@@ -53,50 +53,61 @@ export const CartProvider = ({ children }) => {
   }, [user, authLoading, fetchCartFromBackend]);
 
 
-  const addToCart = async (product, qty = 1) => {
-    const existingItem = cartItems.find(item => item._id === product._id);
-    let updatedCartItems;
+   const addToCart = async (product, qty = 1) => {
+    setLoading(true); 
+    try {
+      const existingItem = cartItems.find(item => item._id === product._id);
+      let updatedCartItems;
 
-    if (existingItem) {
-      updatedCartItems = cartItems.map(item =>
-        item._id === product._id
-          ? { ...item, qty: item.qty + qty }
-          : item
-      );
-    } else {
-      updatedCartItems = [...cartItems, { ...product, qty }];
-    }
-    setCartItems(updatedCartItems);
-     toast.success(`${qty}x ${product.name} ajouté au panier !`);
-
-    // Synchroniser avec le backend si l'utilisateur est connecté
-    if (user && !authLoading) {
-      try {
-        await axiosClient.post('/users/cart/add', {
-          productId: product._id,
-          qty: qty
-        });
-      } catch (error) {
-        console.error("Erreur lors de l'ajout au panier côté backend:", error);
-        // Gérer l'erreur (ex: annuler l'ajout local ou afficher un message)
+      if (existingItem) {
+        updatedCartItems = cartItems.map(item =>
+          item._id === product._id
+            ? { ...item, qty: item.qty + qty }
+            : item
+        );
+      } else {
+        updatedCartItems = [...cartItems, { ...product, qty }];
       }
+      setCartItems(updatedCartItems);
+
+      // Synchronisation avec le backend
+      if (user && !authLoading) {
+         await axiosClient.post('/users/cart/add', { productId: product._id, qty: qty });
+      }
+      toast.success(`${qty}x ${product.name} ajouté au panier !`);
+    } catch (error) {
+      console.error("Erreur lors de l'ajout au panier côté backend:", error);
+      toast.error("Échec de l'ajout au panier.");
+    } finally {
+      setLoading(false); // Désactive le chargement, qu'il y ait eu succès ou échec
     }
   };
 
   const removeFromCart = async (id) => {
-    const updatedCartItems = cartItems.filter(item => item._id !== id);
-    setCartItems(updatedCartItems);
-    // toast.success('Produit retiré du panier.');
+  console.log('🔍 DEBUG - ID à supprimer:', id);
+  console.log('🔍 DEBUG - Type de l\'ID:', typeof id);
+  console.log('🔍 DEBUG - Panier actuel:', cartItems.map(item => ({
+    _id: item._id,
+    name: item.name,
+    type: typeof item._id
+  })));
 
-    // Synchroniser avec le backend si l'utilisateur est connecté
-    if (user && !authLoading) {
-      try {
-        await axiosClient.delete(`/users/cart/remove/${id}`);
-      } catch (error) {
-        console.error("Erreur lors du retrait du panier côté backend:", error);
-      }
+  const updatedCartItems = cartItems.filter(item => item._id !== id);
+  setCartItems(updatedCartItems);
+  toast.success('Produit retiré du panier.');
+
+  if (user && !authLoading) {
+    try {
+      console.log('🔍 DEBUG - URL appelée:', `/users/cart/remove/${id}`);
+      const response = await axiosClient.delete(`/users/cart/remove/${id}`);
+      console.log('✅ DEBUG - Réponse backend:', response.data);
+    } catch (error) {
+      console.error("❌ DEBUG - Erreur complète:", error);
+      console.error("❌ DEBUG - Status:", error.response?.status);
+      console.error("❌ DEBUG - Message:", error.response?.data);
     }
-  };
+  }
+};
 
   const updateCartQty = async (id, qty) => {
     let updatedCartItems = cartItems.map(item =>
@@ -147,6 +158,7 @@ export const CartProvider = ({ children }) => {
         clearCart,
         cartTotal,
         cartItemsCount,
+        loading
       }}
     >
       {children}

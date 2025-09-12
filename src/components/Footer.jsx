@@ -73,7 +73,7 @@ const Footer = () => {
             <h3 className="text-white font-semibold text-lg mb-4">Mon Compte</h3>
             <ul>
               <li className="mb-2">
-                <Link to="/profile" className="text-sm hover:text-white transition-colors duration-200">Mon Compte</Link>
+                <Link to="/mon-compte" className="text-sm hover:text-white transition-colors duration-200">Mon Compte</Link>
               </li>
               <li className="mb-2">
                 <Link to="/historique-commandes" className="text-sm hover:text-white transition-colors duration-200">Historique des commandes</Link>

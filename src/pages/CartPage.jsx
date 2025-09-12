@@ -1,6 +1,6 @@
 // src/pages/CartPage.jsx
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '../components/ui/button';
@@ -19,6 +19,7 @@ const CartPage = () => {
   const { cartItems, removeFromCart, updateCartQty, cartTotal, clearCart } = useCart();
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [removingItems, setRemovingItems] = useState(new Set());
 
@@ -47,7 +48,12 @@ const CartPage = () => {
   const handleCheckout = () => {
     if (authLoading) return;
     if (!user) {
-      navigate('/login?redirect=/checkout');
+      // Rediriger vers login en spécifiant que l'utilisateur veut aller au checkout
+      navigate('/login', { 
+        state: { 
+          from: { pathname: '/checkout' }
+        } 
+      });
     } else {
       navigate('/checkout');
     }

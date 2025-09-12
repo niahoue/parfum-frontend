@@ -16,18 +16,16 @@ const FemmeNouveautesPage = () => {
       setLoading(true);
       setError(null);
       
-      try {
-        console.log('Chargement des nouveautés femme...');
+      try {;
         
         const { data } = await axiosClient.get('/products', {
           params: {
             category: 'femme',
-            isNew: 'true', // Utiliser isNew au lieu de isNewProduct
+            isNew: 'true',
             pageSize: 100
           }
         });
         
-        console.log('Nouveautés reçues:', data);
         setProducts(data.products || []);
         
       } catch (err) {

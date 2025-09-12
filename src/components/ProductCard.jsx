@@ -3,17 +3,18 @@ import React, { useState, useEffect } from 'react';
 import { Heart, ShoppingBag, Star, Eye } from 'lucide-react';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
-import { useCart } from '../contexts/CartContext'; // Importez le hook de CartContext
-import { useAuth } from '../contexts/AuthContext'; // Importez le hook de AuthContext
-import axiosClient from '../api/axiosClient'; // Pour les appels API de wishlist
-import { useNavigate } from 'react-router-dom'; // Pour la navigation
+import { useCart } from '../contexts/CartContext';
+import { useAuth } from '../contexts/AuthContext';
+import axiosClient from '../api/axiosClient'; 
+import { useNavigate } from 'react-router-dom'; 
+import { toast } from 'react-hot-toast';
 
-const ProductCard = ({ product }) => { // onViewDetails n'est plus nécessaire car la carte est un lien
+const ProductCard = ({ product }) => {
   const [isLiked, setIsLiked] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const { addToCart } = useCart(); // Fonction d'ajout au panier du contexte
-  const { user } = useAuth(); // Informations utilisateur du contexte
-  const navigate = useNavigate(); // Hook pour la navigation
+  const { addToCart } = useCart(); 
+  const { user } = useAuth(); 
+  const navigate = useNavigate(); 
 
   // Mettre à jour l'état isLiked en fonction de la wishlist de l'utilisateur
   useEffect(() => {
@@ -28,37 +29,35 @@ const ProductCard = ({ product }) => { // onViewDetails n'est plus nécessaire c
     e.stopPropagation();
     if (product.countInStock > 0) {
       addToCart(product, 1);
-      // alert(`${product.name} ajouté au panier !`); // Utilisez toast si react-hot-toast est installé
+       alert(`${product.name} ajouté au panier !`); 
     }
   };
 
   const toggleLike = async (e) => {
     e.stopPropagation();
     if (!user) {
-      // toast.error("Veuillez vous connecter pour ajouter des favoris."); // Si vous utilisez react-hot-toast
-      alert("Veuillez vous connecter pour ajouter des favoris.");
-      navigate('/login'); // Redirige vers la page de connexion
+       toast.error("Veuillez vous connecter pour ajouter des favoris.")
+      navigate('/login');
       return;
     }
 
     try {
       if (isLiked) {
         await axiosClient.delete(`/users/wishlist/${product._id}`);
-        // toast.success("Produit retiré des favoris !");
+         toast.success("Produit retiré des favoris !");
       } else {
         await axiosClient.post('/users/wishlist', { productId: product._id });
-        // toast.success("Produit ajouté aux favoris !");
+         toast.success("Produit ajouté aux favoris !");
       }
-      setIsLiked(!isLiked); // Bascule l'état après succès API
+      setIsLiked(!isLiked); 
     } catch (err) {
       console.error("Erreur wishlist:", err.response?.data?.message || err.message);
-      // toast.error("Erreur lors de la mise à jour des favoris.");
-      alert("Erreur lors de la mise à jour des favoris.");
+       toast.error("Erreur lors de la mise à jour des favoris.");
     }
   };
 
   const handleViewDetails = () => {
-    navigate(`/products/${product._id}`); // Naviguer vers la page de détails du produit
+    navigate(`/products/${product._id}`); 
   };
 
   const discountPercentage = product.originalPrice && product.originalPrice > product.price
@@ -91,7 +90,7 @@ const ProductCard = ({ product }) => { // onViewDetails n'est plus nécessaire c
               -{discountPercentage}%
             </Badge>
           )}
-          {product.countInStock === 0 && ( // Utiliser countInStock
+          {product.countInStock === 0 && ( 
             <Badge variant="secondary" className="bg-gray-500 text-white">
               Rupture
             </Badge>
@@ -115,7 +114,7 @@ const ProductCard = ({ product }) => { // onViewDetails n'est plus nécessaire c
           <Button
             size="sm"
             variant="outline"
-            onClick={handleViewDetails} // La carte est déjà cliquable, ce bouton pourrait être redondant
+            onClick={handleViewDetails} 
             className="p-2 rounded-full bg-white/80 hover:bg-white backdrop-blur-sm border-white/20"
           >
             <Eye className="w-4 h-4" />
@@ -125,7 +124,7 @@ const ProductCard = ({ product }) => { // onViewDetails n'est plus nécessaire c
         {/* Product Image */}
         <div className="aspect-square overflow-hidden">
           <img
-            src={product.imageUrl} // Utiliser product.imageUrl
+            src={product.imageUrl} 
             alt={product.name}
             className={`w-full h-full object-cover transition-transform duration-700 ${
               isHovered ? 'scale-110' : 'scale-100'
@@ -149,7 +148,7 @@ const ProductCard = ({ product }) => { // onViewDetails n'est plus nécessaire c
           <div className="flex items-center space-x-1">
             <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
             <span className="text-sm font-medium text-gray-700">{product.rating}</span>
-            <span className="text-xs text-gray-500">({product.numReviews})</span> {/* Utiliser product.numReviews */}
+            <span className="text-xs text-gray-500">({product.numReviews})</span> 
           </div>
         </div>
 
@@ -167,7 +166,7 @@ const ProductCard = ({ product }) => { // onViewDetails n'est plus nécessaire c
 
         {/* Notes */}
         <div className="flex flex-wrap gap-1">
-          {product.notes && product.notes.slice(0, 2).map((note, index) => ( // Vérifier product.notes
+          {product.notes && product.notes.slice(0, 2).map((note, index) => ( 
             <span
               key={index}
               className="px-2 py-1 bg-gray-100 text-xs text-gray-600 rounded-full"
@@ -175,7 +174,7 @@ const ProductCard = ({ product }) => { // onViewDetails n'est plus nécessaire c
               {note}
             </span>
           ))}
-          {product.notes && product.notes.length > 2 && ( // Vérifier product.notes
+          {product.notes && product.notes.length > 2 && (
             <span className="px-2 py-1 bg-gray-100 text-xs text-gray-600 rounded-full">
               +{product.notes.length - 2}
             </span>
@@ -185,7 +184,7 @@ const ProductCard = ({ product }) => { // onViewDetails n'est plus nécessaire c
         {/* Price */}
         <div className="flex items-center space-x-2">
           <span className="text-xl font-bold text-gray-900">
-            {product.price.toLocaleString('fr-FR', { style: 'currency', currency: 'XOF' })} {/* Formater le prix */}
+            {product.price.toLocaleString('fr-FR', { style: 'currency', currency: 'XOF' })}
           </span>
           {product.originalPrice && (
             <span className="text-sm text-gray-500 line-through">
@@ -197,7 +196,7 @@ const ProductCard = ({ product }) => { // onViewDetails n'est plus nécessaire c
         {/* Add to Cart Button */}
         <Button
           onClick={handleAddToCart}
-          disabled={product.countInStock === 0} // Utiliser countInStock
+          disabled={product.countInStock === 0} 
           className={`w-full mt-4 rounded-full font-semibold transition-all duration-300 ${
             product.countInStock > 0
               ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5'

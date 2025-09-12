@@ -3,7 +3,20 @@ import React, { useState, useEffect } from 'react';
 import axiosClient from '../../api/axiosClient';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
-import { Trash2, Edit, PlusCircle, Loader2, ToggleRight, ToggleLeft } from 'lucide-react';
+import { 
+  Trash2, 
+  Edit, 
+  PlusCircle, 
+  Loader2, 
+  ToggleRight, 
+  ToggleLeft, 
+  Search, 
+  Tag, 
+  Calendar,
+  DollarSign,
+  Percent,
+  Gift
+} from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -18,7 +31,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-  DialogDescription, // Importez DialogDescription pour l'accessibilité
+  DialogDescription,
 } from '../../components/ui/dialog';
 import {
   Select,
@@ -27,24 +40,31 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../../components/ui/select';
-// import { toast } from 'react-hot-toast'; // Décommentez si utilisé
 
 const ManagePromotionPage = () => {
   const [promotions, setPromotions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [formLoading, setFormLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingPromotion, setEditingPromotion] = useState(null); // Pour la modification
+  const [editingPromotion, setEditingPromotion] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
   const [formData, setFormData] = useState({
     message: '',
     code: '',
-    discountType: 'percentage', // Nouveau champ: type de réduction (percentage ou fixed)
-    discountValue: 0,           // Nouveau champ: valeur de la réduction
+    discountType: 'percentage',
+    discountValue: 0,
     minAmount: 0,
     startDate: '',
     endDate: '',
     isActive: true,
   });
+
+  // Filtrer les promotions
+  const filteredPromotions = promotions.filter(promo =>
+    promo.message.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    promo.code.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const fetchPromotions = async () => {
     setLoading(true);
@@ -55,7 +75,6 @@ const ManagePromotionPage = () => {
     } catch (err) {
       console.error('Erreur lors du chargement des promotions:', err);
       setError(err.response?.data?.message || 'Échec du chargement des promotions.');
-      // toast.error(err.response?.data?.message || 'Échec du chargement des promotions.');
     } finally {
       setLoading(false);
     }
@@ -73,9 +92,7 @@ const ManagePromotionPage = () => {
         type === 'checkbox'
           ? checked
           : (name === 'discountValue' || name === 'minAmount')
-            ? // Convertit en nombre, ou 0 si la valeur est vide ou non valide.
-              // Ceci aide à éviter l'avertissement "uncontrolled to controlled" et assure que les nombres sont stockés.
-              Number(value) || 0
+            ? Number(value) || 0
             : value,
     }));
   };
@@ -91,10 +108,8 @@ const ManagePromotionPage = () => {
     setEditingPromotion(promotion);
     setFormData({
       ...promotion,
-      // Convertir les dates ISO en format YYYY-MM-DD pour les inputs HTML
       startDate: promotion.startDate ? new Date(promotion.startDate).toISOString().split('T')[0] : '',
       endDate: promotion.endDate ? new Date(promotion.endDate).toISOString().split('T')[0] : '',
-      // Assurer que les valeurs numériques sont des nombres pour le formulaire
       discountValue: Number(promotion.discountValue) || 0,
       minAmount: Number(promotion.minAmount) || 0,
     });
@@ -106,28 +121,24 @@ const ManagePromotionPage = () => {
       try {
         setLoading(true);
         await axiosClient.delete(`/promotions/${id}`);
-        // toast.success('Promotion supprimée avec succès !');
-        fetchPromotions(); // Recharger les promotions
+        fetchPromotions();
       } catch (err) {
         console.error('Erreur lors de la suppression de la promotion:', err);
         setError(err.response?.data?.message || 'Échec de la suppression de la promotion.');
-        // toast.error('Échec de la suppression de la promotion.');
       } finally {
         setLoading(false);
       }
     }
   };
 
-  const handleToggleActive = async (promotionId, currentStatus) => {
+  const handleToggleActive = async (promotionId) => {
     try {
       setLoading(true);
       await axiosClient.patch(`/promotions/${promotionId}/toggle`);
-      // toast.success(`Promotion ${currentStatus ? 'désactivée' : 'activée'} avec succès !`);
-      fetchPromotions(); // Recharger les promotions pour voir le statut mis à jour
+      fetchPromotions();
     } catch (err) {
       console.error('Erreur lors du changement de statut de la promotion:', err);
       setError(err.response?.data?.message || 'Échec de la mise à jour du statut de la promotion.');
-      // toast.error('Échec de la mise à jour du statut de la promotion.');
     } finally {
       setLoading(false);
     }
@@ -135,55 +146,48 @@ const ManagePromotionPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    setFormLoading(true);
     setError(null);
 
     try {
-      // Les dates doivent être envoyées au format ISO ou Date object
       const payload = {
         ...formData,
-        // Assurez-vous que les dates sont envoyées comme chaînes ISO 8601 ou null
         startDate: formData.startDate ? new Date(formData.startDate).toISOString() : null,
         endDate: formData.endDate ? new Date(formData.endDate).toISOString() : null,
-        // Assurez-vous que discountValue et minAmount sont des nombres pour le backend
         discountValue: Number(formData.discountValue),
         minAmount: Number(formData.minAmount),
       };
 
       if (editingPromotion) {
         await axiosClient.put(`/promotions/${editingPromotion._id}`, payload);
-        // toast.success('Promotion mise à jour avec succès !');
       } else {
         await axiosClient.post('/promotions', payload);
-        // toast.success('Promotion ajoutée avec succès !');
       }
       setIsModalOpen(false);
       setEditingPromotion(null);
-      setFormData({ // Réinitialiser le formulaire
+      setFormData({
         message: '',
         code: '',
-        discountType: 'percentage', // Réinitialiser avec les valeurs par défaut
+        discountType: 'percentage',
         discountValue: 0,
         minAmount: 0,
         startDate: '',
         endDate: '',
         isActive: true,
       });
-      fetchPromotions(); // Recharger les promotions
+      fetchPromotions();
     } catch (err) {
       console.error('Erreur lors de la soumission de la promotion:', err);
-      // Pour les erreurs 500, le message peut être générique. Tentez d'afficher le message du backend.
       setError(err.response?.data?.message || 'Échec de l\'opération sur la promotion. Veuillez vérifier les champs.');
-      // toast.error(err.response?.data?.message || 'Échec de l\'opération sur la promotion.');
     } finally {
-      setLoading(false);
+      setFormLoading(false);
     }
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setEditingPromotion(null);
-    setFormData({ // Réinitialiser le formulaire
+    setFormData({
       message: '',
       code: '',
       discountType: 'percentage',
@@ -195,134 +199,398 @@ const ManagePromotionPage = () => {
     });
   };
 
-  if (loading) return <div className="text-center py-10"><Loader2 className="animate-spin inline-block mr-2" />Chargement des promotions...</div>;
-  if (error) return <div className="text-center py-10 text-red-600">{error}</div>;
+  const getDiscountIcon = (type) => {
+    return type === 'percentage' ? <Percent className="h-4 w-4" /> : <DollarSign className="h-4 w-4" />;
+  };
+
+  if (loading && promotions.length === 0) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50">
+        <div className="flex items-center justify-center h-96">
+          <div className="text-center">
+            <Loader2 className="animate-spin h-12 w-12 text-purple-600 mx-auto mb-4" />
+            <p className="text-lg text-slate-600">Chargement des promotions...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50">
+        <div className="flex items-center justify-center h-96">
+          <div className="text-center bg-white p-8 rounded-xl shadow-lg">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Gift className="h-8 w-8 text-red-600" />
+            </div>
+            <p className="text-xl text-red-600 font-semibold">{error}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="container mx-auto py-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Gestion des Promotions</h1>
-        <Button onClick={() => { setEditingPromotion(null); setIsModalOpen(true); }} className="bg-gradient-to-r from-purple-600 to-pink-600 text-white">
-          <PlusCircle className="h-5 w-5 mr-2" /> Ajouter une Promotion
-        </Button>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-orange-50">
+      <div className="container mx-auto px-4 py-8">
+        {/* En-tête moderne */}
+        <div className="bg-white rounded-2xl shadow-xl p-8 mb-8 border border-purple-100">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl">
+                <Gift className="h-8 w-8 text-white" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-slate-800">Gestion des Promotions</h1>
+                <p className="text-slate-600 mt-1">{promotions.length} promotion{promotions.length > 1 ? 's' : ''} enregistrée{promotions.length > 1 ? 's' : ''}</p>
+              </div>
+            </div>
+            
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
+                <Input
+                  placeholder="Rechercher une promotion..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 w-64 border-slate-300 focus:border-purple-500 focus:ring-purple-500"
+                />
+              </div>
+              <Button 
+                onClick={() => { setEditingPromotion(null); setIsModalOpen(true); }}
+                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 py-3 rounded-xl shadow-lg transform transition-all duration-200 hover:scale-105"
+              >
+                <PlusCircle className="h-5 w-5 mr-2" />
+                Nouvelle Promotion
+              </Button>
+            </div>
+          </div>
+        </div>
 
-      <div className="bg-white p-6 rounded-lg shadow-md overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>ID</TableHead>
-              <TableHead>Message</TableHead>
-              <TableHead>Code</TableHead> {/* Ajout de la colonne Code */}
-              <TableHead>Type</TableHead>
-              <TableHead>Valeur</TableHead>
-              <TableHead>Min. Achat</TableHead>
-              <TableHead>Début</TableHead>
-              <TableHead>Fin</TableHead>
-              <TableHead>Active</TableHead>
-              <TableHead>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {promotions.map((promo) => (
-              <TableRow key={promo._id}>
-                <TableCell className="text-sm">{promo._id.substring(0, 8)}...</TableCell>
-                <TableCell className="font-medium">{promo.message}</TableCell>
-                <TableCell><code className="bg-gray-100 p-1 rounded text-sm">{promo.code}</code></TableCell>
-                <TableCell>{promo.discountType === 'percentage' ? 'Pourcentage' : 'Fixe'}</TableCell>
-                <TableCell>
-                  {/* Correction ici: S'assure que la valeur est un nombre avant toLocaleString */}
-                  {promo.discountType === 'percentage'
-                    ? `${promo.discountValue || 0}%`
-                    : `${(typeof promo.discountValue === 'number' ? promo.discountValue : 0).toLocaleString('fr-FR', { style: 'currency', currency: 'XOF' })}`}
-                </TableCell>
-                <TableCell>{(typeof promo.minAmount === 'number' ? promo.minAmount : 0).toLocaleString('fr-FR', { style: 'currency', currency: 'XOF' })}</TableCell>
-                <TableCell>{new Date(promo.startDate).toLocaleDateString('fr-FR')}</TableCell>
-                <TableCell>{new Date(promo.endDate).toLocaleDateString('fr-FR')}</TableCell>
-                <TableCell>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleToggleActive(promo._id, promo.isActive)}
-                    className={promo.isActive ? 'text-green-600' : 'text-red-600'}
-                    title={promo.isActive ? 'Désactiver' : 'Activer'}
+        {/* Tableau moderne */}
+        <div className="bg-white rounded-2xl shadow-xl border border-purple-100 overflow-hidden">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-gradient-to-r from-purple-50 to-pink-50 border-b border-purple-100">
+                  <TableHead className="font-semibold text-slate-700 py-4">ID</TableHead>
+                  <TableHead className="font-semibold text-slate-700">Message</TableHead>
+                  <TableHead className="font-semibold text-slate-700">Code</TableHead>
+                  <TableHead className="font-semibold text-slate-700">Type</TableHead>
+                  <TableHead className="font-semibold text-slate-700">Réduction</TableHead>
+                  <TableHead className="font-semibold text-slate-700">Min. Achat</TableHead>
+                  <TableHead className="font-semibold text-slate-700">Période</TableHead>
+                  <TableHead className="font-semibold text-slate-700 text-center">Statut</TableHead>
+                  <TableHead className="font-semibold text-slate-700 text-center">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredPromotions.map((promo, index) => (
+                  <TableRow 
+                    key={promo._id} 
+                    className="border-b border-slate-100 hover:bg-gradient-to-r hover:from-purple-25 hover:to-pink-25 transition-all duration-200"
                   >
-                    {promo.isActive ? <ToggleRight className="h-5 w-5" /> : <ToggleLeft className="h-5 w-5" />}
-                  </Button>
-                </TableCell>
-                <TableCell className="flex space-x-2">
-                  <Button variant="outline" size="sm" onClick={() => handleEdit(promo)}>
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button variant="destructive" size="sm" onClick={() => handleDelete(promo._id)}>
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+                    <TableCell className="font-mono text-sm text-slate-500 py-4">
+                      <span className="bg-slate-100 px-2 py-1 rounded-md">
+                        #{String(index + 1).padStart(3, '0')}
+                      </span>
+                    </TableCell>
+                    <TableCell className="py-4 max-w-xs">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-gradient-to-br from-purple-100 to-pink-100 rounded-lg">
+                          <Tag className="h-4 w-4 text-purple-600" />
+                        </div>
+                        <span className="font-medium text-slate-800 truncate">{promo.message}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <code className="bg-gradient-to-r from-purple-100 to-pink-100 text-purple-800 px-3 py-1 rounded-lg font-mono text-sm font-semibold">
+                        {promo.code}
+                      </code>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <div className={`p-1 rounded ${promo.discountType === 'percentage' ? 'bg-green-100 text-green-600' : 'bg-blue-100 text-blue-600'}`}>
+                          {getDiscountIcon(promo.discountType)}
+                        </div>
+                        <span className="text-sm font-medium">
+                          {promo.discountType === 'percentage' ? 'Pourcentage' : 'Montant fixe'}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="font-bold text-lg">
+                        {promo.discountType === 'percentage'
+                          ? <span className="text-green-600">{promo.discountValue || 0}%</span>
+                          : <span className="text-blue-600">{(typeof promo.discountValue === 'number' ? promo.discountValue : 0).toLocaleString('fr-FR', { style: 'currency', currency: 'XOF' })}</span>
+                        }
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <span className="text-slate-600 font-medium">
+                        {(typeof promo.minAmount === 'number' ? promo.minAmount : 0).toLocaleString('fr-FR', { style: 'currency', currency: 'XOF' })}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-2 text-sm">
+                          <Calendar className="h-3 w-3 text-slate-500" />
+                          <span className="text-slate-600">
+                            {new Date(promo.startDate).toLocaleDateString('fr-FR')}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                          <span className="text-slate-400">au</span>
+                          <span className="text-slate-600">
+                            {new Date(promo.endDate).toLocaleDateString('fr-FR')}
+                          </span>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex justify-center">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleToggleActive(promo._id, promo.isActive)}
+                          className={`p-2 rounded-xl transition-all duration-200 ${
+                            promo.isActive 
+                              ? 'bg-green-100 text-green-600 hover:bg-green-200' 
+                              : 'bg-red-100 text-red-600 hover:bg-red-200'
+                          }`}
+                          title={promo.isActive ? 'Désactiver' : 'Activer'}
+                        >
+                          {promo.isActive ? <ToggleRight className="h-5 w-5" /> : <ToggleLeft className="h-5 w-5" />}
+                        </Button>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex justify-center gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => handleEdit(promo)}
+                          className="border-purple-200 text-purple-600 hover:bg-purple-50 hover:border-purple-300 rounded-lg"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => handleDelete(promo._id)}
+                          className="border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 rounded-lg"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+
+          {filteredPromotions.length === 0 && (
+            <div className="text-center py-12">
+              <Gift className="h-16 w-16 text-slate-300 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-slate-600 mb-2">
+                {searchTerm ? 'Aucune promotion trouvée' : 'Aucune promotion'}
+              </h3>
+              <p className="text-slate-500">
+                {searchTerm ? 'Essayez de modifier votre recherche.' : 'Commencez par créer votre première promotion.'}
+              </p>
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Promotion Add/Edit Modal */}
+      {/* Modal moderne */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-[600px] bg-white">
-          <DialogHeader>
-            <DialogTitle>{editingPromotion ? 'Modifier la Promotion' : 'Ajouter une Promotion'}</DialogTitle>
-            {/* Ajout de la description pour l'accessibilité */}
-            <DialogDescription>
+        <DialogContent className="sm:max-w-[700px] bg-white rounded-2xl shadow-2xl border-0 max-h-[90vh] overflow-y-auto">
+          <DialogHeader className="pb-6">
+            <DialogTitle className="text-2xl font-bold text-slate-800 flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg">
+                <Gift className="h-6 w-6 text-white" />
+              </div>
+              {editingPromotion ? 'Modifier la Promotion' : 'Nouvelle Promotion'}
+            </DialogTitle>
+            <DialogDescription className="text-slate-600">
               {editingPromotion ? 'Modifiez les détails de cette promotion.' : 'Créez une nouvelle promotion en remplissant les informations ci-dessous.'}
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleSubmit} className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <label htmlFor="message" className="text-right">Message</label>
-              <Input id="message" name="message" value={formData.message} onChange={handleInputChange} className="col-span-3" required />
+          
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Message et Code */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label htmlFor="message" className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                  <Tag className="h-4 w-4" />
+                  Message de la promotion
+                </label>
+                <Input 
+                  id="message" 
+                  name="message" 
+                  value={formData.message} 
+                  onChange={handleInputChange} 
+                  placeholder="Ex: Remise de printemps..." 
+                  className="border-slate-300 focus:border-purple-500 focus:ring-purple-500 rounded-lg"
+                  required 
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <label htmlFor="code" className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                  <Gift className="h-4 w-4" />
+                  Code Promo
+                </label>
+                <Input 
+                  id="code" 
+                  name="code" 
+                  value={formData.code} 
+                  onChange={handleInputChange} 
+                  placeholder="SPRING2024" 
+                  className="border-slate-300 focus:border-purple-500 focus:ring-purple-500 rounded-lg font-mono"
+                  required 
+                />
+              </div>
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <label htmlFor="code" className="text-right">Code Promo</label> {/* Ajout du champ code */}
-              <Input id="code" name="code" value={formData.code} onChange={handleInputChange} className="col-span-3" required placeholder="CODEPROMO123" />
+
+            {/* Type et Valeur de réduction */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                  <Percent className="h-4 w-4" />
+                  Type de Réduction
+                </label>
+                <Select 
+                  value={formData.discountType} 
+                  onValueChange={(value) => handleSelectChange('discountType', value)}
+                >
+                  <SelectTrigger className="border-slate-300 focus:border-purple-500 focus:ring-purple-500 rounded-lg">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="percentage">
+                      <div className="flex items-center gap-2">
+                        <Percent className="h-4 w-4 text-green-600" />
+                        Pourcentage (%)
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="fixed">
+                      <div className="flex items-center gap-2">
+                        <DollarSign className="h-4 w-4 text-blue-600" />
+                        Montant Fixe (FCFA)
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <label htmlFor="discountValue" className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                  {formData.discountType === 'percentage' ? <Percent className="h-4 w-4" /> : <DollarSign className="h-4 w-4" />}
+                  Valeur de Réduction
+                </label>
+                <Input 
+                  id="discountValue" 
+                  name="discountValue" 
+                  type="number" 
+                  step="0.01" 
+                  value={formData.discountValue} 
+                  onChange={handleInputChange} 
+                  placeholder={formData.discountType === 'percentage' ? '10' : '5000'}
+                  className="border-slate-300 focus:border-purple-500 focus:ring-purple-500 rounded-lg"
+                  required 
+                />
+              </div>
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <label htmlFor="discountType" className="text-right">Type de Réduction</label>
-              <Select name="discountType" value={formData.discountType} onValueChange={(value) => handleSelectChange('discountType', value)} className="col-span-3">
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Sélectionner le type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="percentage">Pourcentage (%)</SelectItem>
-                  <SelectItem value="fixed">Montant Fixe (FCFA)</SelectItem>
-                </SelectContent>
-              </Select>
+
+            {/* Montant minimum */}
+            <div className="space-y-2">
+              <label htmlFor="minAmount" className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                <DollarSign className="h-4 w-4" />
+                Montant Minimum d'Achat (FCFA)
+              </label>
+              <Input 
+                id="minAmount" 
+                name="minAmount" 
+                type="number" 
+                step="0.01" 
+                value={formData.minAmount} 
+                onChange={handleInputChange} 
+                placeholder="0"
+                className="border-slate-300 focus:border-purple-500 focus:ring-purple-500 rounded-lg"
+                required 
+              />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <label htmlFor="discountValue" className="text-right">Valeur de Réduction</label>
-              <Input id="discountValue" name="discountValue" type="number" step="0.01" value={formData.discountValue} onChange={handleInputChange} className="col-span-3" required />
+
+            {/* Dates */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label htmlFor="startDate" className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  Date de Début
+                </label>
+                <Input 
+                  id="startDate" 
+                  name="startDate" 
+                  type="date" 
+                  value={formData.startDate} 
+                  onChange={handleInputChange} 
+                  className="border-slate-300 focus:border-purple-500 focus:ring-purple-500 rounded-lg"
+                  required 
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <label htmlFor="endDate" className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  Date de Fin
+                </label>
+                <Input 
+                  id="endDate" 
+                  name="endDate" 
+                  type="date" 
+                  value={formData.endDate} 
+                  onChange={handleInputChange} 
+                  className="border-slate-300 focus:border-purple-500 focus:ring-purple-500 rounded-lg"
+                  required 
+                />
+              </div>
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <label htmlFor="minAmount" className="text-right">Min. Achat (FCFA)</label>
-              <Input id="minAmount" name="minAmount" type="number" step="0.01" value={formData.minAmount} onChange={handleInputChange} className="col-span-3" required />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <label htmlFor="startDate" className="text-right">Date de début</label>
-              <Input id="startDate" name="startDate" type="date" value={formData.startDate} onChange={handleInputChange} className="col-span-3" required />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <label htmlFor="endDate" className="text-right">Date de fin</label>
-              <Input id="endDate" name="endDate" type="date" value={formData.endDate} onChange={handleInputChange} className="col-span-3" required />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <label htmlFor="isActive" className="text-right">Active</label>
-              <input id="isActive" name="isActive" type="checkbox" checked={formData.isActive} onChange={handleInputChange} className="col-span-3 w-4 h-4" />
+
+            {/* Statut actif */}
+            <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg">
+              <input 
+                id="isActive" 
+                name="isActive" 
+                type="checkbox" 
+                checked={formData.isActive} 
+                onChange={handleInputChange} 
+                className="w-5 h-5 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500"
+              />
+              <label htmlFor="isActive" className="text-sm font-semibold text-slate-700">
+                Activer cette promotion immédiatement
+              </label>
             </div>
             
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={handleCloseModal}>
+            <DialogFooter className="gap-3 pt-6 border-t">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={handleCloseModal}
+                className="border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg px-6"
+              >
                 Annuler
               </Button>
-              <Button type="submit" disabled={loading}>
-                {loading ? <Loader2 className="animate-spin mr-2" /> : null}
-                {editingPromotion ? 'Modifier' : 'Ajouter'}
+              <Button 
+                type="submit" 
+                disabled={formLoading}
+                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-lg px-6"
+              >
+                {formLoading && <Loader2 className="animate-spin mr-2 h-4 w-4" />}
+                {editingPromotion ? 'Modifier' : 'Créer la Promotion'}
               </Button>
             </DialogFooter>
           </form>

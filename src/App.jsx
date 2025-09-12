@@ -1,14 +1,11 @@
 // src/App.jsx
 import React from "react";
 import "./App.css";
-import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, Outlet , useLocation } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import { Toaster } from "react-hot-toast";
-
 import Header from "./components/Header";
 import Footer from "./components/Footer";
-
-// Contexts
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { CartProvider } from "./contexts/CartContext";
 
@@ -27,7 +24,6 @@ import DeliveryPaymentPage from "./pages/DeliveryPaymentPage";
 import PaymentSuccessPage from "./pages/PaymentSuccesPage";
 import PaymentCancelPage from "./pages/paymentCancelPage"
 import MyAccountPage from "./pages/MyAccountPage";
-import OrderHistoryPage from './pages/OrderHistoryPage';
 import PromotionsPage from './pages/PromotionsPage';
 import NewArrivalsPage from './pages/NewArrivalsPage';
 import AboutUsPage from './pages/AboutUsPage';
@@ -63,6 +59,7 @@ import CosmeticsPage from './pages/cosmetiques/CosmeticsPage';
 // Route protégée pour utilisateurs connectés
 const PrivateRoute = ({ children }) => {
   const { user, loading } = useAuth();
+  const location = useLocation();
   
   if (loading) {
     return (
@@ -73,14 +70,15 @@ const PrivateRoute = ({ children }) => {
     );
   }
   if (!user) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
-  return children || <Outlet />;
+  return children ? children : <Outlet />;
 };
 
 // Route protégée pour administrateurs
 const AdminRoute = ({ children }) => {
   const { user, loading } = useAuth();
+  const location = useLocation();
   
   if (loading) {
     return (
@@ -91,7 +89,7 @@ const AdminRoute = ({ children }) => {
     );
   }
   if (!user || !user.isAdmin) {
-    return <Navigate to="/" replace />;
+     return <Navigate to="/" state={{ from: location }} replace />;
   }
   return children || <Outlet />;
 };
@@ -130,7 +128,7 @@ const App = () => {
                 <Route path="/delivery-payment/:orderId" element={<PrivateRoute><DeliveryPaymentPage /></PrivateRoute>} />
                 <Route path="/payment-success" element={<PaymentSuccessPage />} />
                 <Route path="/payment-cancel" element={<PaymentCancelPage />} />
-                <Route path="/historique-commandes" element={<PrivateRoute><OrderHistoryPage /></PrivateRoute>} />
+                
 
                 {/* Administrateur */}
                 <Route path="/admin/*" element={<AdminRoute><DashboardPage /></AdminRoute>}>

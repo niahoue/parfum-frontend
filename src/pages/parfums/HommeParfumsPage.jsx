@@ -22,8 +22,6 @@ const HommeParfumsPage = () => {
       setError(null);
       
       try {
-        console.log('Chargement des parfums homme...');
-        
         // Récupérer d'abord les catégories pour trouver l'ID exact
         const categoriesRes = await axiosClient.get('/categories');
         const maleCategory = categoriesRes.data.find(cat => 
@@ -39,12 +37,10 @@ const HommeParfumsPage = () => {
         // Récupérer tous les produits de la catégorie "Homme"
         const { data } = await axiosClient.get('/products', {
           params: {
-            category: maleCategory._id, // Utiliser l'ID exact de la catégorie
+            category: maleCategory._id,
             pageSize: 100
           }
         });
-        
-        console.log('Données reçues:', data);
         setProducts(data.products || []);
         
       } catch (err) {

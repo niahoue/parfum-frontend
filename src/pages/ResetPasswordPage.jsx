@@ -44,8 +44,6 @@ const ResetPasswordPage = () => {
     setIsLoading(true);
     
     try {
-      console.log(`🔐 Réinitialisation du mot de passe avec token: ${token}`);
-      
       const config = {
         headers: {
           'Content-Type': 'application/json',

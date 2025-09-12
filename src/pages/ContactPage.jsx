@@ -5,6 +5,7 @@ import { Textarea } from '../components/ui/textarea';
 import { MapPin, Phone, Mail } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
+import axiosClient from '../api/axiosClient';
 
 const ContactPage = () => {
   const [formData, setFormData] = useState({
@@ -26,35 +27,13 @@ const ContactPage = () => {
 
 const handleSubmit = async (e) => {
   e.preventDefault();
-
   try {
     setLoading(true);
-
-    const res = await fetch('/api/contact', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(formData),
-    });
-
-    // Essayer de parser le JSON même en cas d'erreur
-    let data;
-    try {
-      data = await res.json();
-    } catch {
-      data = { success: false, message: "Réponse invalide du serveur." };
-    }
-
-    if (res.ok && data.success) {
-      toast.success(data.message || "Votre message a été envoyé avec succès !");
-      setFormData({ name: '', email: '', subject: '', message: '' });
-    } else {
-      toast.error(data.message || "Une erreur est survenue. Veuillez réessayer.");
-    }
+    const res = await axiosClient.post('/contact', formData);
+    toast.success(res.data.message || "Votre message a été envoyé avec succès !");
+    // ...
   } catch (error) {
-    console.error("Erreur lors de l'envoi du message :", error);
-    toast.error("Impossible d'envoyer le message. Vérifiez votre connexion.");
+    toast.error(error.response?.data?.message || "Une erreur est survenue.");
   } finally {
     setLoading(false);
   }

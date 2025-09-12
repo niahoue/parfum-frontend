@@ -186,12 +186,6 @@ const ProductManagementPage = () => {
       dataToSend.append('image', file);
     }
 
-    // Debug : afficher le contenu du FormData
-    console.log('FormData content:');
-    for (let [key, value] of dataToSend.entries()) {
-      console.log(key, value);
-    }
-
     try {
       if (editingProduct) {
         await axiosClient.put(`/products/${editingProduct._id}`, dataToSend, {
