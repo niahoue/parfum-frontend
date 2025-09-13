@@ -1,7 +1,7 @@
 // src/contexts/AuthContext.jsx
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axiosClient from '../api/axiosClient';
-// import { toast } from 'react-hot-toast'; // Décommentez si vous utilisez toast
+import { toast } from 'react-hot-toast';
 
 const AuthContext = createContext(null);
 
@@ -9,7 +9,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('token'));
   const [loading, setLoading] = useState(true);
-  const [authReady, setAuthReady] = useState(false); // Ajout d'un état pour indiquer que l'auth est prête
+  const [authReady, setAuthReady] = useState(false); 
 
   useEffect(() => {
     const loadUser = async () => {
@@ -40,12 +40,11 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('token', data.token);
       axiosClient.defaults.headers.common['Authorization'] = `Bearer ${data.token}`;
       setUser(data);
-      // toast.success('Connexion réussie !'); // Décommentez si vous utilisez toast
+    toast.success('Connexion réussie !'); 
       return data;
     } catch (error) {
       console.error('Erreur de connexion:', error);
-      // toast.error(error.response?.data?.message || 'Échec de la connexion.'); // Décommentez si vous utilisez toast
-      throw error;
+     toast.error(error.response?.data?.message || 'Échec de la connexion.'); 
     }
   };
 
@@ -72,27 +71,27 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
     setUser(null);
     localStorage.removeItem('token');
-    delete axiosClient.defaults.headers.common['Authorization']; // Supprimez l'en-tête d'autorisation
-    // toast.success('Déconnexion réussie !'); // Décommentez si vous utilisez toast
+    delete axiosClient.defaults.headers.common['Authorization']; 
+    toast.success('Déconnexion réussie !'); 
   };
 
   // Fonction pour mettre à jour le profil utilisateur
   const updateAuthUserProfile = async (updatedData) => {
     try {
       const { data } = await axiosClient.put('/users/profile', updatedData);
-      setUser(data); // Met à jour l'état de l'utilisateur avec les nouvelles données
-      // toast.success('Profil mis à jour avec succès !'); // Décommentez si vous utilisez toast
+      setUser(data); 
+       toast.success('Profil mis à jour avec succès !'); 
       return data;
     } catch (error) {
       console.error('Erreur lors de la mise à jour du profil:', error);
-      // toast.error(error.response?.data?.message || 'Échec de la mise à jour du profil.'); // Décommentez si vous utilisez toast
+      toast.error(error.response?.data?.message || 'Échec de la mise à jour du profil.'); 
       throw error;
     }
   };
 
   return (
     <AuthContext.Provider value={{ user, token, loading, authReady, login, register, logout, updateAuthUserProfile }}>
-      {authReady && children} {/* Rendre les enfants seulement quand l'auth est prête */}
+      {authReady && children} 
     </AuthContext.Provider>
   );
 };

@@ -79,13 +79,13 @@ const UserProfileEdit = ({ user, onSave, onCancel, loading }) => {
 
 // Sous-composant pour l'affichage du profil
 const UserProfile = ({ user, onEditClick }) => {
-  if (!user) return <div>Veuillez vous connecter.</div>; // Géré par PrivateRoute normalement
+  if (!user) return <div>Veuillez vous connecter.</div>;
 
   return (
     <div>
       <h2 className="text-3xl font-bold mb-6">Mon Profil</h2>
       <div className="space-y-4 text-lg">
-        <p><strong>Nom :</strong> {user.name || 'Non spécifié'}</p> {/* Ajouté 'Non spécifié' */}
+        <p><strong>Nom :</strong> {user.name || 'Non spécifié'}</p> 
         <p><strong>Email :</strong> {user.email}</p>
         {user.phone && <p className="flex items-center"><Phone className="mr-2 h-5 w-5 text-gray-600" /><strong>Téléphone :</strong> {user.phone}</p>}
         {user.address && <p className="flex items-center"><MapPin className="mr-2 h-5 w-5 text-gray-600" /><strong>Adresse :</strong> {user.address}</p>}

@@ -17,12 +17,9 @@ const LoginPage = () => {
   const { login, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-
-  // Récupérer la page d'origine ou utiliser la page d'accueil par défaut
   const from = location.state?.from?.pathname || '/';
 
   useEffect(() => {
-    // Si l'utilisateur est déjà connecté, le rediriger
     if (user) {
       navigate(from, { replace: true });
     }

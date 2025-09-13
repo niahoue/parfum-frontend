@@ -46,14 +46,10 @@ import UserManagementPage from "./pages/admin/UserManagementPage";
 import StatisticsPage from "./pages/admin/StatisticsPage";
 import ManagePromotionPage from "./pages/admin/ManagePromotionPage";
 import NewsletterManagementPage from "./pages/admin/NewsletterManagementPage";
-
-// Parfums
 import FemmeParfumsPage from './pages/parfums/FemmeParfumsPage';
 import HommeParfumsPage from './pages/parfums/HommeParfumsPage';
 import MixteParfumsPage from './pages/parfums/MixteParfumsPage';
-// Marques
 import BrandsPage from './pages/marques/BrandsPage';
-// Cosmétiques
 import CosmeticsPage from './pages/cosmetiques/CosmeticsPage';
 
 // Route protégée pour utilisateurs connectés
